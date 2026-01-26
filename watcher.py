@@ -39,7 +39,7 @@ TARGETS = [
     "503 country wood cr",
     "503 country wood",
 ]
-TARGETS_NORM = [normalize(t) for t in TARGETS]
+
 
 def build_session() -> requests.Session:
     session = requests.Session()
@@ -84,6 +84,8 @@ def normalize(s: str) -> str:
     s = re.sub(r"[^a-z0-9\s]", " ", s)  # remove punctuation
     s = re.sub(r"\s+", " ", s).strip()
     return s
+    
+TARGETS_NORM = [normalize(t) for t in TARGETS]
 
 def load_seen() -> dict:
     if os.path.exists(STATE_FILE):
