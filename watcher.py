@@ -14,9 +14,6 @@ from pdf2image import convert_from_bytes
 
 #FORCE_RESCAN = os.getenv("FORCE_RESCAN", "false").lower() == "true"
 
-TEST_PDF_URL = os.getenv("TEST_PDF_URL", "").strip()
-TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
-
 FORECLOSURES_URL = "https://www.co.hardin.tx.us/page/Foreclosures"
 STATE_FILE = "seen.json"
 
@@ -25,7 +22,6 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 # Address matching: include common variations and abbreviations
 TARGETS = [
-    "70 DOGWOOD",
     "503 COUNTRYWOOD CIRCLE",
     "503 COUNTRYWOOD",
     "503 COUNTRY WOOD",
@@ -152,18 +148,9 @@ def get_pdf_links(session: requests.Session) -> list:
     return deduped
 
 def main():
-    notify_discord("Foreclosure watcher ran successfully (test ping).")
+    notify_discord("Foreclosure watcher running.")
     session = build_session()
 
-    if TEST_MODE and TEST_PDF_URL:
-        print("TEST_MODE enabled. Scanning TEST_PDF_URL only.")
-        hit = scan_pdf(session, TEST_PDF_URL, "TEST_PDF_URL")
-        if hit:
-            notify_discord("✅ TEST HIT on: " + TEST_PDF_URL)
-        else:
-            notify_discord("❌ TEST NO HIT on: " + TEST_PDF_URL)
-        return
-    
     seen = load_seen()
     try:
         pdf_links = get_pdf_links(session)
