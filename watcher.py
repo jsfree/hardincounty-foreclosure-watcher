@@ -30,27 +30,27 @@ TARGETS = [
 def build_session() -> requests.Session:
     session = requests.Session()
 
-    # Retries for slow servers
-retry = Retry(
-    total=5,
-    connect=5,
-    read=5,
-    backoff_factor=2,
-    status_forcelist=[429, 500, 502, 503, 504],
-    allowed_methods=["GET", "HEAD"],
-    raise_on_status=False,
-)
-
-adapter = HTTPAdapter(max_retries=retry)
-session.mount("https://", adapter)
-session.mount("http://", adapter)
-
-# Some servers act better with a normal UA
-session.headers.update({
-    "User-Agent": "Mozilla/5.0 (compatible; foreclosure-watcher/1.0; +https://github.com/)"
-})
-
-return session
+        # Retries for slow servers
+    retry = Retry(
+        total=5,
+        connect=5,
+        read=5,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+        allowed_methods=["GET", "HEAD"],
+        raise_on_status=False,
+    )
+    
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    
+    # Some servers act better with a normal UA
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (compatible; foreclosure-watcher/1.0; +https://github.com/)"
+    })
+    
+    return session
 
 def normalize(s: str) -> str:
     s = (s or "").lower()
