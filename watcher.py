@@ -14,6 +14,9 @@ from pdf2image import convert_from_bytes
 
 #FORCE_RESCAN = os.getenv("FORCE_RESCAN", "false").lower() == "true"
 
+TEST_PDF_URL = os.getenv("TEST_PDF_URL", "").strip()
+TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
+
 FORECLOSURES_URL = "https://www.co.hardin.tx.us/page/Foreclosures"
 STATE_FILE = "seen.json"
 
@@ -60,6 +63,19 @@ def build_session() -> requests.Session:
     })
     
     return session
+
+def scan_pdf(session: requests.Session, url: str, title: str) -> bool:
+    r = session.get(url, timeout=(15, 180))
+    r.raise_for_status()
+
+    raw_text = extract_text_with_ocr(r.content)
+    print("OCR sample (first 300 chars):", raw_text[:300])
+
+    text = normalize(raw_text)
+    hit = any(target in text for target in TARGETS)
+    print("Hit?", hit, "Title:", title)
+    return hit
+
 
 def normalize(s: str) -> str:
     s = (s or "").lower()
@@ -133,6 +149,16 @@ def get_pdf_links(session: requests.Session) -> list:
 def main():
     notify_discord("Foreclosure watcher ran successfully (test ping).")
     session = build_session()
+
+    if TEST_MODE and TEST_PDF_URL:
+        print("TEST_MODE enabled. Scanning TEST_PDF_URL only.")
+        hit = scan_pdf(session, TEST_PDF_URL, "TEST_PDF_URL")
+        if hit:
+            notify_discord("✅ TEST HIT on: " + TEST_PDF_URL)
+        else:
+            notify_discord("❌ TEST NO HIT on: " + TEST_PDF_URL)
+        return
+    
     seen = load_seen()
     try:
         pdf_links = get_pdf_links(session)
