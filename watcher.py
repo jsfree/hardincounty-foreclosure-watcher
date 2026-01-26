@@ -12,6 +12,8 @@ from bs4 import BeautifulSoup
 import pytesseract
 from pdf2image import convert_from_bytes
 
+FORCE_RESCAN = os.getenv("FORCE_RESCAN", "false").lower() == "true"
+
 FORECLOSURES_URL = "https://www.co.hardin.tx.us/page/Foreclosures"
 STATE_FILE = "seen.json"
 
@@ -20,6 +22,13 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 # Address matching: include common variations and abbreviations
 TARGETS = [
+    "70 DOGWOOD",
+    "503 COUNTRYWOOD CIRCLE",
+    "503 COUNTRYWOOD",
+    "503 COUNTRY WOOD",
+    "503 Country Wood Circle",
+    "503 Country Wood",
+    "503 Countrywood",
     "503 country wood circle",
     "503 countrywood circle",
     "503 country wood cir",
@@ -125,7 +134,7 @@ def main():
 
     for url, title in pdf_links:
         key = hashlib.sha256(url.encode("utf-8")).hexdigest()
-        if key in seen:
+        if (not FORCE_RESCAN) and (key in seen):
             continue
 
         any_new = True
