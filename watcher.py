@@ -148,7 +148,6 @@ def get_pdf_links(session: requests.Session) -> list:
     return deduped
 
 def main():
-    notify_discord("Foreclosure watcher running.")
     session = build_session()
 
     seen = load_seen()
@@ -176,7 +175,7 @@ def main():
             text = normalize(raw_text)
             print("OCR sample (first 300 chars):", raw_text[:300])
 
-            hit = any(target in text for target in TARGETS)
+            hit = any(t in text for t in TARGETS_NORM)
             print("Hit?", hit, "Title:", title)
             
             seen[key] = {"url": url, "title": title, "hit": hit}
@@ -197,6 +196,7 @@ def main():
 
     if not any_new:
         print("No new PDFs since last run.")
+        notify_discord("✅ Foreclosure watcher check complete: no new foreclosure PDFs found.")
     else:
         print("Run complete. Updated seen.json.")
 
