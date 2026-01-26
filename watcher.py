@@ -78,8 +78,17 @@ def save_seen(seen: dict) -> None:
 
 def notify_discord(message: str) -> None:
     if not DISCORD_WEBHOOK_URL:
-        print("DISCORD_WEBHOOK_URL not set; skipping Discord notification.")
+        print("ERROR: DISCORD_WEBHOOK_URL not set; cannot notify.")
         return
+
+    print("Sending Discord notification...")
+    payload = {"content": message}
+    r = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=20)
+    print("Discord status:", r.status_code)
+    print("Discord body:", r.text[:200])
+    r.raise_for_status()
+    print("Discord notification sent OK.")
+
 
     payload = {"content": message}
     r = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=20)
