@@ -27,7 +27,7 @@ jobs:
       - name: Run watcher
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          FORCE_RESCAN: "true"
+          
         run: |
           python watcher.py
 
