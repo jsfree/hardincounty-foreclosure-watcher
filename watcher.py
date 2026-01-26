@@ -14,7 +14,7 @@ FORECLOSURES_URL = "https://www.co.hardin.tx.us/page/Foreclosures"
 STATE_FILE = "seen.json"
 
 # Discord webhook is stored as a GitHub Secret (safer than hardcoding it)
-DISCORD_WEBHOOK_URL = os.getenv("https://discord.com/api/webhooks/1465382065850548418/T2lP3RR-riLBMFJXJHkZX7J4mkQTE3yEWF7miknQBGVu7PfWER-1I3VRTej9KaFy7oq9")
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 # Address matching: include common variations and abbreviations
 TARGETS = [
