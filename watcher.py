@@ -106,11 +106,6 @@ def notify_discord(message: str) -> None:
     r.raise_for_status()
     print("Discord notification sent OK.")
 
-
-    payload = {"content": message}
-    r = requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=20)
-    r.raise_for_status()
-
 def extract_text_with_ocr(pdf_bytes: bytes) -> str:
     # Convert each PDF page to an image (OCR works on images)
     images = convert_from_bytes(pdf_bytes, dpi=300)
