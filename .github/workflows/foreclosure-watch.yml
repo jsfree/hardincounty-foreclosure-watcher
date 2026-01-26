@@ -1,0 +1,39 @@
+name: Foreclosure Watch
+
+on:
+  schedule:
+    - cron: "20 * * * *"   # every hour at :20 (UTC)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies (OCR + PDF tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr poppler-utils
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          pip install requests beautifulsoup4 pytesseract pdf2image
+
+      - name: Run watcher
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python watcher.py
+
+      - name: Save seen.json (so we don't re-scan the same PDFs)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add seen.json
+          git commit -m "Update seen state" || echo "No changes"
+          git push
