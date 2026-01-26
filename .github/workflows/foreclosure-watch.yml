@@ -26,9 +26,7 @@ jobs:
 
       - name: Run watcher
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          TEST_MODE: "true"
-          TEST_PDF_URL: "https://www.co.hardin.tx.us/upload/page/8842/Docs/2026/Mar%2026/1%20Notice%20of%20Sale%20-%20Esther%20Randall%20Estates%20Subdivision%20-%20Lot%201.pdf"      
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}    
         run: |
           python watcher.py
 
