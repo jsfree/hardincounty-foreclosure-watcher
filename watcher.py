@@ -3,6 +3,8 @@ import re
 import json
 import hashlib
 from io import BytesIO
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 import requests
 from bs4 import BeautifulSoup
@@ -25,6 +27,30 @@ TARGETS = [
     "503 country wood cr",
     "503 country wood",
 ]
+def build_session() -> requests.Session:
+    session = requests.Session()
+
+    # Retries for slow servers
+retry = Retry(
+    total=5,
+    connect=5,
+    read=5,
+    backoff_factor=2,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET", "HEAD"],
+    raise_on_status=False,
+)
+
+adapter = HTTPAdapter(max_retries=retry)
+session.mount("https://", adapter)
+session.mount("http://", adapter)
+
+# Some servers act better with a normal UA
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (compatible; foreclosure-watcher/1.0; +https://github.com/)"
+})
+
+return session
 
 def normalize(s: str) -> str:
     s = (s or "").lower()
@@ -62,8 +88,10 @@ def extract_text_with_ocr(pdf_bytes: bytes) -> str:
 
     return "\n".join(text_parts)
 
-def get_pdf_links() -> list:
-    html = requests.get(FORECLOSURES_URL, timeout=30).text
+def get_pdf_links(session: requests.Session) -> list:
+    resp = session.get(FORECLOSURES_URL, timeout=(15, 90))
+    resp.raise_for_status()
+    html = resp.text
     soup = BeautifulSoup(html, "html.parser")
 
     links = []
@@ -85,8 +113,13 @@ def get_pdf_links() -> list:
     return deduped
 
 def main():
+    session = build_session()
     seen = load_seen()
-    pdf_links = get_pdf_links()
+    try:
+        pdf_links = get_pdf_links(session)
+    except Exception as e:
+        print("Could not load foreclosures page. Will retry next run. Error:", str(e))
+        return
 
     any_new = False
 
@@ -99,7 +132,7 @@ def main():
         print("New PDF found, OCR scanning:", url)
 
         try:
-            r = requests.get(url, timeout=60)
+            r = requests.get(url, timeout=(15, 180))
             r.raise_for_status()
 
             raw_text = extract_text_with_ocr(r.content)
