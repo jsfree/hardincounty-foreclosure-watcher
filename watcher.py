@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 import pytesseract
 from pdf2image import convert_from_bytes
 
-FORCE_RESCAN = os.getenv("FORCE_RESCAN", "false").lower() == "true"
+#FORCE_RESCAN = os.getenv("FORCE_RESCAN", "false").lower() == "true"
 
 FORECLOSURES_URL = "https://www.co.hardin.tx.us/page/Foreclosures"
 STATE_FILE = "seen.json"
@@ -122,6 +122,7 @@ def get_pdf_links(session: requests.Session) -> list:
     return deduped
 
 def main():
+    notify_discord("Foreclosure watcher ran successfully (test ping).")
     session = build_session()
     seen = load_seen()
     try:
