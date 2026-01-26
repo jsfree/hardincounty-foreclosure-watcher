@@ -135,7 +135,7 @@ def main():
 
     for url, title in pdf_links:
         key = hashlib.sha256(url.encode("utf-8")).hexdigest()
-        if (not FORCE_RESCAN) and (key in seen):
+        if key in seen:
             continue
 
         any_new = True
