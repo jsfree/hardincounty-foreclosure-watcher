@@ -147,9 +147,11 @@ def main():
 
             raw_text = extract_text_with_ocr(r.content)
             text = normalize(raw_text)
+            print("OCR sample (first 300 chars):", raw_text[:300])
 
             hit = any(target in text for target in TARGETS)
-
+            print("Hit?", hit, "Title:", title)
+            
             seen[key] = {"url": url, "title": title, "hit": hit}
 
             if hit:
