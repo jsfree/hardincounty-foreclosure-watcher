@@ -39,6 +39,8 @@ TARGETS = [
     "503 country wood cr",
     "503 country wood",
 ]
+TARGETS_NORM = [normalize(t) for t in TARGETS]
+
 def build_session() -> requests.Session:
     session = requests.Session()
 
@@ -72,13 +74,14 @@ def scan_pdf(session: requests.Session, url: str, title: str) -> bool:
     print("OCR sample (first 300 chars):", raw_text[:300])
 
     text = normalize(raw_text)
-    hit = any(target in text for target in TARGETS)
+    hit = any(t in text for t in TARGETS_NORM)
     print("Hit?", hit, "Title:", title)
     return hit
 
 
 def normalize(s: str) -> str:
     s = (s or "").lower()
+    s = re.sub(r"[^a-z0-9\s]", " ", s)  # remove punctuation
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
